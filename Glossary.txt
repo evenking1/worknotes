@@ -1,0 +1,395 @@
+Glossary
+========
+
+
+Graphics Core			(GC)
+Bus Interface			(BIF/PCIE)
+Graphics Memory Controller	(GMC)
+Universal Video Decoder		(UVD)
+Image Sensor Processor		(ISP)
+Video Compression Engine	(VCE)
+Display Controller Engine	(DCE)
+Platform Security Processor	(PSP)
+System Management Unit 		(SMU)
+(OS Support)OSS (SRBM(System Register Bus Master old), SDMA(System DMA), (Interrupt Handler)IH, (Semphone)SEM, HDP(Host Data Path))
+
+Power management, Interrupts, Etc	(PIE)
+Machine Check Architecture		(MCA)
+
+SW components in Virtualization system	(GIM)
+
+
+PCIE/nBIO
+
+Design Validation (DV)
+
+(Central engineer & Infrastruct)CE
+(Production & Platform Engineering)PPE
+(Randon TecH Group)RTG
+SCBU
+
+
+(All Feature Enable) AFE
+
+
+PCIe Root Complex (RC)
+PCIe Root Port (RP)
+Single Root PCI Manager (SR-PCIM)
+Translation Agent (TA)
+Address Translation Services(ATS)
+Address Translation and Protection Table (ATPT)
+Address Translation Cache (ATC)
+Access Control Services (ACS)
+Physical Function (PF)
+Virtual Function (VF)
+VF Memory Space Enable (MSE)
+
+Fabric coherent Hypertransport Interface	(FHI)
+Fabric Configuration Interface			(FCI)
+Fabric Miscellaneous Interface			(FMI)
+Fabric Debug Interface				(FDI)
+
+
+
+
+export DISPLAY=10.237.185.131:0
+
+
+p1 AFE finish
+P2 & P3 July finished
+
+Address Translation Cache (ATC)
+
+
+Physical memory info
+====================
+dmidecode -t memory | grep Size
+
+Travel
+======
+http://srdc
+
+
+
+SimNow
+======
+http://confluence.amd.com/display/AVD/Diag+Simnow+Setup+Guide
+
+
+
+TServer source
+==============
+http://ppesvn.amd.com/diagnostics/gpu
+
+svn co http://ppesvn.amd.com/diagnostics/gpu/trunk
+
+
+
+
+TServer build
+=============
+
+
+cmake ./gpu/trunk/ -DPROJECT=greenland -DCMAKE_TOOLCHAIN_FILE=linux_gnu_x86_64_official -DPACKAGE=pcie,phy,rate,sdma,hdp,mgpu,pmm -DENABLE_WERROR=pcie,sdma -DBUILD_TYPE=dbg
+
+cmake ../../trunk/ -DPROJECT=greenland -DPACKAGE=pcie,phy,rate,sdma,hdp,mgpu -DENVIRONMENT=silicon,scemi,driver -DCMAKE_TOOLCHAIN_FILE=linux_clang_x86_64_official -DSANITIZE=address -DBUILD_TYPE=mem -G "Ninja"
+
+cmake ../../trunk/ -DPROJECT=greenland -DPACKAGE=all -DCMAKE_TOOLCHAIN_FILE=linux_clang_x86_64_official -DSANITIZE=address -DBUILD_TYPE=dbg
+
+
+
+cmake ../../trunk/ -DPROJECT=vega20 -DCMAKE_TOOLCHAIN_FILE=linux_gnu_x86_64_official -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPACKAGE=pcie,phy,rate,sdma,hdp,mgpu,gmix -DENABLE_WERROR=pcie,sdma -DBUILD_TYPE=dbg
+
+cmake ../../trunk/ -DPROJECT=vega20 -DCMAKE_TOOLCHAIN_FILE=linux_gnu_x86_64_official -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPACKAGE=pcie,phy,rate,sdma,hdp,mgpu,gmix,tcore2 -DENABLE_WERROR=pcie,sdma -DBUILD_TYPE=dbg
+
+make install -j6
+
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+cmake ../../trunk/ -DPROJECT=vega12 -DPACKAGE=all -DCMAKE_TOOLCHAIN_FILE=linux_gnu_x86_64_official -DBUILD_TYPE=rel -G "Ninja"
+cmake ../../trunk/ -DPROJECT=vega12 -DPACKAGE=sandbox -DCMAKE_TOOLCHAIN_FILE=linux_gnu_x86_64_official -DBUILD_TYPE=dbg
+
+mount srdc-toolchain-storage:/tools /tools
+
+
+
+
+TServer test
+============
+
+./tserverlite -d=1 -pr -nw -eofe -test=AG002.1
+
+-tc_load_ucode=1 -tsl_load_ucode=0
+tc_load_ucode |  boolean | Use TCore to load the microcode for all supported IP blocks through direct register access
+numvf |   string | Number of Virtual Functions. Can have a value of zero, 1-16, or max.
+mgpu |  boolean | Run test on all selected devices concurrently
+
+./tserverlite -d=1 -pr -nw -eofe -tc_load_ucode=1 -tsl_load_ucode=0 -test=SDB001.001
+
+
+d: Device id
+pr: Productions reports(only dispaly fail/pass)
+nw: No wait(won't wait for user to exit Tserver)
+eofe: exit on fist error
+test: test case(refer to param.xml)
+
+tc_MgpuMode | none|pcie|xgmi | set mGPU mode
+
+
+Misc
+====
+Platform: 10.237.90.82
+(x99)Platform: 10.237.90.25  user:yjiang1 passwd:b!
+
+Tags for C++
+============
+ctags -R --langmap=c++:+.inl . 
+
+ctags -R --c++-kinds=+p --fields=+iaS --extra=+q
+
+ctags -R --c-kinds=+l+x+p --fields=+lS -I __THROW,__nonnull-f sys.tags
+
+find ./lib/gpu/ ./lib/common/ ./app/common ./external/amd/include ./external/amd/lib/gfx9 ./external/amd/lib/gpu ./external/amd/lib/nbridge ./suite -name "*.h" -print -o -name "*.hpp" -print -o -name "*.c" -print -o -name "*.cpp"  -print | xargs ctags -a --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -I DllImportExport_TCORE2  --sort=yes -L -
+
+
+ 
+
+每个参数解释如下：
+
+-R:ctags循环生成子目录的tags
+
+--c++-kinds=+px :ctags记录c++文件中的函数声明和各种外部和前向声明
+
+--fields=+iaS :ctags要求描述的信息，其中i表示如果有继承，则标识出父类；a表示如果元素是类成员的话，要标明其调用权限（即是public还是private）；S表示如果是函数，则标识函数的signature。
+
+--extra=+q:强制要求ctags做如下操作—如果某个语法元素是类的一个成员，ctags默认会给其记录一行，可以要求ctags对同一个语法元斯屹记一行，这样可以保证在VIM中多个同名函数可以通过路径不同来区分。
+
+
+
+PCI commands
+============
+cat /proc/iomem    //Show IO memory mapping
+cat /proc/ioports  //Show IO ports
+
+
+lspci -t
+lspci -s 0000:03:00.0 -vxx
+
+
+setpci --dumpregs //Dump support register name
+setpci -s 0000:03:00.0 BASE_ADDRESS_0.L=0xe0000000
+
+
+VBIOS
+=====
+
+*Show VBIOS Info*
+./amdvbflash -ai
+
+* Program VBIOS *
+./amdvbflash -f -p <card_num> <file>
+
+* Save VBIOS *
+./amdvbflash -s <card_num> <file>
+
+
+*Show card security state*
+./atitool -i=0 -securitystate
+
+
+
+Main Thread
+===========
+(gdb) bt
+#0  0x0000000000cc2445 in CVega10GraphicsDevice::TestRegAperture (this=0xe1e07a0) at /home/gary/work/gpu/trunk/external/amd/lib/gpu/tool/gpu/toollib/vega10/vega10_graphics_device.cpp:150
+#1  0x00000000007ff6f5 in CGraphicsDevice::DetectRegisterAperture (this=0xe1e07a0) at /home/gary/work/gpu/trunk/external/amd/lib/gpu/tool/gpu/toollib/GraphicsDevice.cpp:557
+#2  0x0000000000cc2706 in CVega10GraphicsDevice::Initialize (this=0xe1e07a0) at /home/gary/work/gpu/trunk/external/amd/lib/gpu/tool/gpu/toollib/vega10/vega10_graphics_device.cpp:224
+#3  0x0000000000813a42 in CTool::SearchDeviceAt (this=0xce58c60 <CTool::Instance()::tool>, bn=3 '\003', dn=0 '\000', handle=@0x7fffffffb434: 32767) at /home/gary/work/gpu/trunk/external/amd/lib/gpu/tool/gpu/toollib/Tool.cpp:727
+#4  0x00000000007a8063 in TOOLLIB_FindDevice (bn=3 '\003', dn=0 '\000', fn=0 '\000', device=0xe1a5d18) at /home/gary/work/gpu/trunk/external/amd/lib/gpu/tool/gpu/toollib/atitoollib.cpp:402
+#5  0x000000000079d8f1 in TcoreSiliconTarget::PowerUpIps (this=0xe1a5b30) at /home/gary/work/gpu/trunk/lib/gpu/tcore_target/tcore_silicon_target.cpp:1064
+#6  0x000000000079a0ed in TcoreSiliconTarget::PreTcoreOneTimeInit (this=0xe1a5b30) at /home/gary/work/gpu/trunk/lib/gpu/tcore_target/tcore_silicon_target.cpp:566
+#7  0x00000000007a4dfb in TcoreTarget::OneTimeInitImpl (this=0xe1a5b30) at /home/gary/work/gpu/trunk/lib/gpu/tcore_target/tcore_target.cpp:200
+#8  0x0000000000790b55 in Target::OneTimeInit (this=0xe1a5b30) at /home/gary/work/gpu/trunk/lib/common/target/target.cpp:70
+#9  0x0000000000462e3c in TestRunGenerator::activate (this=0x7fffffffd1a0) at /home/gary/work/gpu/trunk/app/common/tserverlite/ts_test_run_generator.h:187
+#10 0x00000000004628ca in TestRunGenerator::activateNextTestIteration (this=0x7fffffffd1a0) at /home/gary/work/gpu/trunk/app/common/tserverlite/ts_test_run_generator.h:84
+#11 0x000000000045cad9 in runTests (ts_server=..., parameter_list=..., test_list_repetition_count=1, selected_devices=..., only_init_devices=..., test_list=...) at /home/gary/work/gpu/trunk/app/common/tserverlite/tserverlite.cpp:633
+#12 0x00000000004602d6 in main (argc=6, argv=0x7fffffffe428) at /home/gary/work/gpu/trunk/app/common/tserverlite/tserverlite.cpp:1268
+
+
+
+
+Test Thread call trace
+======================
+#0  0x0000000000416d51 in RunTest::operator() (this=0xe2cf5f8) at /home/gary/work/gpu/trunk/app/common/tserverlite/ts_run_test.cpp:156
+#1  0x0000000000475524 in boost::detail::thread_data<RunTest>::run (this=0xe2cf440) at /home/gary/work/gpu/trunk/external/non-amd/lib/common/boost/boost/thread/detail/thread.hpp:116
+#2  0x000000000075058b in boost::(anonymous namespace)::thread_proxy (param=0xe2cf440) at /home/gary/work/gpu/trunk/external/non-amd/lib/common/boost/libs/thread/src/pthread/thread.cpp:171
+#3  0x0000000002a27004 in start_thread (arg=0x7fffd7b3a700) at pthread_create.c:333
+#4  0x0000000002b7e929 in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+
+
+Enumerator PCI device
+=====================
+#0  env::pci_kernel_driver_get_all_devices (pci_enumerator=..., device_list=..., pciSpoof=0x0) at /home/gary/work/gpu/trunk/lib/common/env/linux/env_linux_pci_kernel_driver.cpp:280
+#1  0x000000000298cdff in env::PciEnumerator::PciEnumerator (this=0xe1a3280, pciSpoof=0x0, use_kernel_driver=true) at /home/gary/work/gpu/trunk/lib/common/env/linux/env_linux_pci.cpp:360
+#2  0x0000000002962f66 in env::System::System (this=0xe2e1940, pciSpoof=0x0, use_kernel_driver=true) at /home/gary/work/gpu/trunk/lib/common/env/env_device.cpp:67
+#3  0x000000000078a2d1 in env_device_interface::env_device_interface (this=0x7fffffffd6ef, cmd_line_params=...) at /home/gary/work/gpu/trunk/lib/common/env_device_interface/env_device_interface.cpp:50
+#4  0x0000000000445041 in Target_creator::enumerate (this=0x7fffffffdf40, cmdLineParam=...) at /home/gary/work/gpu/trunk/app/common/tserverlite/ts_target_creator.cpp:176
+#5  0x00000000004596bc in getSelectedAndOnlyInitDevices (parameter_list=..., target_creator=..., selected_devices=..., only_init_devices=...) at /home/gary/work/gpu/trunk/app/common/tserverlite/tserverlite.cpp:241
+#6  0x00000000004601c7 in main (argc=6, argv=0x7fffffffe448) at /home/gary/work/gpu/trunk/app/common/tserverlite/tserverlite.cpp:1234
+
+
+
+
+
+
+
+RAS related register
+
+PIE:
+	DF_PIE_AON:MCPIE_CTL
+	DF_PIE_AON:MCPIE_CTL_MASK
+
+
+MP0:
+
+	MP0_MCMP0_CTL
+
+
+
+
+
+XGMI local framebuffer size(16MB granule)
+mc_vm_xgmi_lfb_size
+
+
+How to identify which GPU is GPU0
+=================================
+SMUIO:SMUIO_MCM_CONFIG??·??[R/W]??·??32 bits??·??Access: 8/16/32??·??GpuF0Reg:0x5a08c?
+SOCKET_ID field you give you the respective GPU 
+
+
+You can take the release VBIOS and ask rajanikant to provide you the xGMI customized
+
+
+HDT: 10.237.90.180
+Serial Num: 529F9DDFAA980901
+9D5177CEB5D4F65C4BCACB788D5E1D9C
+
+
+HDT: 10.237.90.160
+Serial Num: 529F9DDFAADA18C1
+2CFDE301D53C3612DC73DB89CBB736D6
+
+
+
+
+GPU0
+====
+
+
+- regr32 1c110
+Read MM Reg 1c110 (fb61c110): 00000021
+- regr32 1c114
+Read MM Reg 1c114 (fb61c114): 0007f000
+- regr32 1c118
+Read MM Reg 1c118 (fb61c118): 00080021
+- regr32 1c11c
+Read MM Reg 1c11c (fb61c11c): 000ff080
+- regr32 1c120
+Read MM Reg 1c120 (fb61c120): 00100021
+- regr32 1c124
+Read MM Reg 1c124 (fb61c124): 0017f100
+- regr32 a5dc 
+Read MM Reg a5dc (fb60a5dc): 00000010
+- regr32 a5e0
+Read MM Reg a5e0 (fb60a5e0): 00000800
+
+
+
+
+
+
+
+
+
+
+GPU1
+====
+
+- regr32 1c110
+Read MM Reg 1c110 (fb41c110): 00080021
+- regr32 1c114
+Read MM Reg 1c114 (fb41c114): 000ff000
+- 
+- 
+- regr32 1c118
+Read MM Reg 1c118 (fb41c118): 00080021
+- regr32 1c11c
+Read MM Reg 1c11c (fb41c11c): 000ff080
+- 
+- 
+- regr32 1c120 
+Read MM Reg 1c120 (fb41c120): 00100021
+- regr32 1c124 
+Read MM Reg 1c124 (fb41c124): 0017f100
+- 
+- 
+- regr32 a5dc
+Read MM Reg a5dc (fb40a5dc): 00000011
+- 
+#MCM_CONFIG
+- regr32 5a08c
+Read MM Reg 5a08c (fb45a08c): 00000020
+
+#MC_VM_XGMI_LFB_SIZE xgmi local framebuffer size 16MB granule (32GB)
+- regr32 a5e0
+Read MM Reg a5e0 (fb40a5e0): 00000800
+
+
+root@nbio-EPYC:~/tools/amdvbflas/x86_64-linux-rel# ./amdvbflash -ai
+Adapter  0    (BN=03, DN=00, PCIID=66A71002, SSID=081E1002)
+    Asic Family        :  Vega20
+    Flash Type         :  M25P80      (1024 KB)
+    Product Name       :  Vega20 A0 XL WS D16004 32GB 1200e/800m
+    Bios Config File   :  D1600400.A09
+    Bios P/N           :  113-D1600400-A09
+    Bios Version       :  016.004.000.001.000000
+    Bios Date          :  05/11/18 23:29
+    ROM Image Type     :  Hybrid Images
+    ROM Image Details  :
+        Image[0]: Size(56832 Bytes), Type(Legacy Image)
+        Image[1]: Size(43520 Bytes), Type(EFI Image)
+
+
+Unsecure orignal VBIOS
+
+Adapter  0    (BN=43, DN=00, PCIID=66A01002, SSID=081E1002)
+    Asic Family        :  Vega20
+    Flash Type         :  GD25Q80C    (1024 KB)
+    Product Name       :  Vega20 A0 XT WS D16001 32GB 300e/350m
+    Bios Config File   :  D1600100.015
+    Bios P/N           :  113-D1600100-015
+    Bios Version       :  016.004.000.015.010666
+    Bios Date          :  06/21/18 21:14
+    ROM Image Type     :  Hybrid Images
+    ROM Image Details  :
+        Image[0]: Size(57856 Bytes), Type(Legacy Image)
+        Image[1]: Size(43520 Bytes), Type(EFI Image)
+Adapter  1    (BN=63, DN=00, PCIID=66A01002, SSID=081E1002)
+    Asic Family        :  Vega20
+    Flash Type         :  GD25Q80C    (1024 KB)
+    Product Name       :  Vega20 A0 XT WS D16001 32GB 300e/350m
+    Bios Config File   :  D1600100.015
+    Bios P/N           :  113-D1600100-015
+    Bios Version       :  016.004.000.015.010666
+    Bios Date          :  06/21/18 21:14
+    ROM Image Type     :  Hybrid Images
+    ROM Image Details  :
+        Image[0]: Size(57856 Bytes), Type(Legacy Image)
+        Image[1]: Size(43520 Bytes), Type(EFI Image)
+
+
+
+
+
+

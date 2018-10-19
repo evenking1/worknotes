@@ -1,0 +1,37 @@
+
+         parent --+----------o------o-o-------------o--                                                               ©¦
+                   \            \           \      /                                                                  ©¦
+                    \          merge      merge  merge                                                                ©¦
+                     \            \           \  /                                                                    ©¦
+         feature      +--o-o-------o----o-o----o-------  
+
+
+
+
+'sync' or 'catch-up' merge)
+==========================
+
+svn merge ^/trunk
+
+
+
+Reintegrate Merge
+=================
+
+svn merge ^/feature
+
+
+
+SVN SWITCH
+==========
+svn switch ^/branches/feature
+svn switch ^/trunk
+
+svn switch ^/branches/private/gliuzd/xgmi
+
+
+Create branch
+=============
+svn copy [your_trunk_url] [your_feature_branch_url] -m [your_log]
+
+
