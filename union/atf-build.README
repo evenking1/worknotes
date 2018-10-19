@@ -1,0 +1,1 @@
+CROSS_COMPILE=aarch64-linux-gnu- MBEDTLS_DIR=../mbedtls/ make V=1 PLAT=union BOOTDEV=emmc STORAGE=emmc SPD=opteed TRUSTED_BOARD_BOOT=1 GENERATE_COT=1 BL33=../u-boot/u-boot.bin bl1 bl2 bl31 fip
